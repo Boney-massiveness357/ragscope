@@ -1,17 +1,13 @@
-from datetime import datetime
-
 from fastapi import HTTPException
 from langchain_chroma import Chroma
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSequence
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 
-import mlflow
 from src.evaluate import run_judge_evaluations
 from src.models import QueryRequest, QueryResponse
 from src.utils.env import (
     CHROMA_PERSIST_DIR,
-    MLFLOW_TRACKING_URI,
     OLLAMA_BASE_URL,
     OLLAMA_EMBED_MODEL,
     OLLAMA_MODEL,
@@ -46,17 +42,6 @@ def _get_vectorstore() -> Chroma:
 
 
 async def handle_query(request: QueryRequest) -> QueryResponse:
-    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-    mlflow.set_experiment("ragscope")
-
-    if mlflow.active_run():
-        mlflow.end_run()
-
-    run_name = datetime.now().strftime("%d-%m-%Y--%H-%M-%S")
-    mlflow.start_run(run_name=run_name)
-
-    mlflow.autolog()
-
     answer = ""
     sources: list[str] = []
 
@@ -92,7 +77,6 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
             run_judge_evaluations(
                 question=request.question,
                 answer=answer,
-                context=context,
             )
 
         return QueryResponse(answer=answer, sources=sources)
@@ -102,6 +86,3 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
     except Exception as exc:
         logger.error(f"Query pipeline error: {exc}")
         raise HTTPException(status_code=500, detail=str(exc))
-
-    finally:
-        mlflow.end_run()
